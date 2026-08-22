@@ -1,0 +1,29 @@
+{
+  "real_A": {
+    "n_batteries": 12,
+    "temp_var_lead": 0.0,
+    "temp_lead": 184.41666666666666,
+    "capacity_lead": 237.83333333333334,
+    "temp_var_pass": false,
+    "temp_pass": true,
+    "capacity_pass": true
+  },
+  "real_B": {
+    "n_batteries": 15,
+    "temp_var_lead": 0.0,
+    "temp_lead": 146.6,
+    "capacity_lead": 327.73333333333335,
+    "temp_var_pass": false,
+    "temp_pass": true,
+    "capacity_pass": true
+  },
+  "real_C": {
+    "n_batteries": 10,
+    "temp_var_lead": 0.0,
+    "temp_lead": 130.1,
+    "capacity_lead": 204.7,
+    "temp_var_pass": false,
+    "temp_pass": true,
+    "capacity_pass": true
+  }
+}
