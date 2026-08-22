@@ -1,4 +1,4 @@
-# BEFORE THE BATTERY KNOWS
+# Before the Battery Knows
 
 *Discovering Hidden Precursors of Battery Degradation from Operating Data*
 
@@ -8,42 +8,56 @@ An empirical investigation into whether raw battery operating data contains hidd
 
 > Does the raw operating data contain a hidden warning signal that appears before conventional battery-health indicators show degradation?
 
-## Key Finding
+## Key Findings
 
-**Temperature variance over 10 cycles detects degradation ~500 cycles before conventional indicators, and generalizes to unseen batteries.**
+### 1. Temperature Variance Fails on Real Data
 
-| Candidate | Train Lead | Test Lead | Generalizes |
-|---|---|---|---|
-| temperature_var_10 | 430 cycles | **498 cycles** | YES |
-| temperature_var_20 | 430 cycles | 498 cycles | YES |
-| temperature | 441 cycles | 498 cycles | YES |
-| capacity | 414 cycles | 456 cycles | YES |
+The discovery engine found 10-cycle temperature variance as a candidate precursor with ~500 cycle lead on synthetic data. But **frozen validation on real-world data shows it fails completely**:
 
-**Discovery engine tested 41 transformations with Bonferroni correction (alpha = 0.0012), found 13 significant candidates, all generalizing to unseen batteries.**
+| Dataset | Batteries | TempVar Lead | Temp Lead | Capacity Lead |
+|---|---|---|---|---|
+| real_A | 12 | **0** | 184 | 238 |
+| real_B | 15 | **0** | 147 | 328 |
+| real_C | 10 | **0** | 130 | 205 |
 
-## How It Works
+**Temperature variance: 0/3 datasets pass.** The synthetic result was an artifact.
 
-1. Monitor temperature signal during battery cycling
-2. Apply CUSUM (Cumulative Sum) change-point detection
-3. Detect statistical shift in temperature variance/mean
-4. This shift appears ~500 cycles before capacity drops below 80% threshold
+### 2. Capacity Remains Most Reliable
 
-## Results
+| Signal | Mean Lead (real data) | Pass Rate |
+|---|---|---|
+| Capacity | 257 cycles | 100% |
+| Temperature | 154 cycles | 100% |
+| Temperature variance | 0 cycles | 0% |
 
-- **20 batteries** (synthetic, 800 cycles each)
-- **14 train / 6 test** (completely unseen)
-- **Train lead: 441 cycles** (temperature CUSUM)
-- **Test lead: 498 cycles** (generalizes perfectly)
-- **100% pass rate** on unseen batteries
+### 3. Early Temperature Predicts Onset Timing
+
+On synthetic data, early temperature (first 100 cycles) predicts which batteries degrade faster with r = -0.42. This is an association, not proven causation.
+
+### 4. Temperature Lead Survives Controlling for Cycle Number
+
+Residualized temperature lead (after removing cycle trend) = 458 cycles, same as raw. The signal is not explained by cycle number.
+
+## What This Project Demonstrates
+
+1. **Discovery engine**: searches 41 signal transformations, applies Bonferroni correction (alpha=0.0012), finds 13 significant candidates on synthetic data
+2. **Cross-dataset validation**: precursor works on 2/3 synthetic datasets, fails on extreme conditions
+3. **Real-world validation**: precursor fails completely on real-world-like data
+4. **Honest negative result**: the discovery was specific to synthetic data
 
 ## Running
 
 ```bash
 pip install -r requirements.txt
-python experiments/feasibility.py          # Phase 1: is there a signal?
+python experiments/feasibility.py          # Phase 1: does signal exist?
 python experiments/discovery.py           # Phase 2: find precursors
 python experiments/unseen_batteries.py    # Phase 3: generalize
-python experiments/full_discovery.py      # Phase 4: beat the baseline
+python experiments/full_discovery.py      # Phase 4: beat baseline
+python experiments/cross_dataset.py       # Cross-dataset validation
+python experiments/mechanism.py           # Why does temperature work?
+python experiments/controlled.py          # Controlled for confounders
+python experiments/frozen_validation.py   # Frozen on independent data
+python experiments/real_validation.py     # Real-world validation
 ```
 
 ## Project Structure
@@ -52,48 +66,35 @@ python experiments/full_discovery.py      # Phase 4: beat the baseline
 battery_precursor/
 ├── src/
 │   ├── core/
-│   │   └── loader.py           # Dataset loader (NASA, CALCE, Oxford, synthetic)
+│   │   └── loader.py           # Dataset loader
 │   ├── features/
-│   │   └── generator.py        # Temporal, electrical, cross-signal features
+│   │   └── generator.py        # Feature generation
 │   ├── baselines/
-│   │   ├── capacity.py         # Baseline A: capacity-based
-│   │   ├── statistical.py      # Baseline B: CUSUM, PELT, Bayesian
-│   │   └── ml.py               # Baseline C: Random Forest, XGBoost
+│   │   ├── capacity.py         # Capacity-based detection
+│   │   ├── statistical.py      # CUSUM, PELT, Bayesian
+│   │   └── ml.py               # Random Forest, XGBoost
 │   ├── discovery/
-│   │   ├── symbolic.py         # Symbolic regression (genetic programming)
-│   │   └── latent.py           # PCA + autoencoder latent discovery
+│   │   ├── engine.py           # Discovery engine with Bonferroni
+│   │   ├── symbolic.py         # Symbolic regression
+│   │   └── latent.py           # PCA + autoencoder
 │   └── evaluation.py
 ├── experiments/
-│   ├── feasibility.py          # Phase 1: does signal exist?
-│   ├── discovery.py            # Phase 2: find precursors
-│   ├── unseen_batteries.py     # Phase 3: generalize
-│   └── full_discovery.py       # Phase 4: beat baseline
-├── data/
-│   ├── raw/synthetic/          # 20 batteries, 800 cycles each
-│   └── results/                # Experiment results
-└── README.md
+│   ├── feasibility.py          # Phase 1
+│   ├── discovery.py            # Phase 2
+│   ├── unseen_batteries.py     # Phase 3
+│   ├── full_discovery.py       # Phase 4
+│   ├── discovery_engine.py     # Full engine
+│   ├── cross_dataset.py        # Cross-dataset validation
+│   ├── mechanism.py            # Why temperature works
+│   ├── controlled.py           # Controlled for confounders
+│   ├── frozen_validation.py    # Frozen on independent data
+│   └── real_validation.py      # Real-world validation
+├── data/raw/                   # Datasets
+└── data/results/               # Experiment results
 ```
 
-## The Science
+## Conclusion
 
-The temperature signal works because:
+The project discovered that temperature-based precursors are dataset-dependent. On synthetic data, temperature variance showed ~500 cycle lead. On real-world-like data, it failed completely. Capacity remains the most reliable predictor across all conditions.
 
-1. **Internal resistance increases before capacity drops**
-2. **Temperature variance increases** as the battery's internal chemistry changes
-3. **CUSUM detects this statistical shift** ~500 cycles early
-4. This is a **physical precursor**, not just a statistical artifact
-
-## What's Next
-
-1. Test on real battery datasets (NASA, CALCE, Oxford)
-2. Build full symbolic discovery pipeline
-3. Stress test: different temperatures, charging rates, noise
-4. Explain WHY temperature works as a precursor
-5. Test on different battery chemistries
-
-## Citation
-
-```
-Before the Battery Knows: Discovering Hidden Precursors of
-Battery Degradation from Operating Data.
-```
+This is a legitimate negative result: we tried to find a better precursor and discovered the limits of what we found.
