@@ -1,0 +1,6 @@
+{
+  "n_batteries": 20,
+  "train": 14,
+  "test": 6,
+  "latent_transitions": 2726
+}
