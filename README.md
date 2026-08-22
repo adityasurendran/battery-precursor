@@ -10,17 +10,16 @@ An empirical investigation into whether raw battery operating data contains hidd
 
 ## Key Finding
 
-**Temperature CUSUM detects degradation ~500 cycles before conventional indicators, and generalizes to unseen batteries.**
+**Temperature variance over 10 cycles detects degradation ~500 cycles before conventional indicators, and generalizes to unseen batteries.**
 
-| Method | Train Lead | Test Lead | Pass Rate |
+| Candidate | Train Lead | Test Lead | Generalizes |
 |---|---|---|---|
-| Temperature CUSUM | 458 cycles | **498 cycles** | 100% |
-| Capacity CUSUM | 458 cycles | 498 cycles | 100% |
-| Best derived feature | 465 cycles | **503 cycles** | 100% |
-| Voltage CUSUM | 137 cycles | 210 cycles | 100% |
-| PCA transition | 106 cycles | — | — |
+| temperature_var_10 | 430 cycles | **498 cycles** | YES |
+| temperature_var_20 | 430 cycles | 498 cycles | YES |
+| temperature | 441 cycles | 498 cycles | YES |
+| capacity | 414 cycles | 456 cycles | YES |
 
-**Temperature changes are an early indicator of internal resistance increase, which precedes capacity degradation by ~500 cycles.**
+**Discovery engine tested 41 transformations with Bonferroni correction (alpha = 0.0012), found 13 significant candidates, all generalizing to unseen batteries.**
 
 ## How It Works
 

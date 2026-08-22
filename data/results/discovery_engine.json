@@ -1,0 +1,52 @@
+{
+  "n_candidates": 41,
+  "n_significant": 13,
+  "validation": [
+    {
+      "name": "capacity",
+      "train_mean": 414.2142857142857,
+      "unseen_mean": 456.1666666666667,
+      "unseen_min": "393",
+      "unseen_max": "515",
+      "generalizes": "True",
+      "n_unseen": 6
+    },
+    {
+      "name": "temperature",
+      "train_mean": 440.85714285714283,
+      "unseen_mean": 497.6666666666667,
+      "unseen_min": "406",
+      "unseen_max": "583",
+      "generalizes": "True",
+      "n_unseen": 6
+    },
+    {
+      "name": "temperature_var_20",
+      "train_mean": 430.35714285714283,
+      "unseen_mean": 497.8333333333333,
+      "unseen_min": "394",
+      "unseen_max": "583",
+      "generalizes": "True",
+      "n_unseen": 6
+    },
+    {
+      "name": "temperature_var_10",
+      "train_mean": 429.85714285714283,
+      "unseen_mean": 498.3333333333333,
+      "unseen_min": "398",
+      "unseen_max": "582",
+      "generalizes": "True",
+      "n_unseen": 6
+    },
+    {
+      "name": "temperature_var_50",
+      "train_mean": 433.92857142857144,
+      "unseen_mean": 497.3333333333333,
+      "unseen_min": "391",
+      "unseen_max": "583",
+      "generalizes": "True",
+      "n_unseen": 6
+    }
+  ],
+  "temp_cusum_test": 497.6666666666667
+}
